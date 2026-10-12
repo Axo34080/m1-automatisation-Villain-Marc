@@ -1,0 +1,31 @@
+info:
+  name: Ticket critique
+  type: http
+  seq: 6
+
+http:
+  method: POST
+  url: "{{baseUrl}}/tickets"
+  headers:
+    - name: apiKey
+      value: "{{secretKey}}"
+    - name: Prefer
+      value: return=representation
+  body:
+    type: json
+    data: |
+      {
+        "organisation_id": "a9d50632-ed84-4b6a-b9a2-84d3e843ad43",
+        "cree_par": "601eeaa2-8fae-4de6-a44c-10d65c66e10e",
+        "titre": "Serveur en panne",
+        "description": "Test escalade critique",
+        "priorite": "critique"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

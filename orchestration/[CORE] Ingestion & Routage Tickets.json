@@ -1,0 +1,387 @@
+{
+  "name": "[CORE] Ingestion & Routage Tickets",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "ticket-webhook.",
+        "responseMode": "=onReceived",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.2,
+      "position": [
+        0,
+        -112
+      ],
+      "id": "b55c7feb-2ae1-4fd6-9c6d-a4f19c4cd97d",
+      "name": "[CORE] Ingestion & Routage Tickets",
+      "webhookId": "db5d81da-17f5-4c41-82d5-6526f1086fa0"
+    },
+    {
+      "parameters": {
+        "jsCode": "const MOTS_CLES = ['panne', 'bloquant', 'urgent'];\n\nreturn $input.all().flatMap(item => {\n  const { type, record, old_record } = item.json.body ?? {};\n  if (!record) return [];\n\n  if (type === 'UPDATE') {\n    if (old_record?.statut === record.statut) return []; \n    return [{\n      json: {\n        evenement: 'UPDATE',\n        ticket_id: record.id,\n        titre: record.titre.trim(),\n        ancien_statut: old_record?.statut,\n        nouveau_statut: record.statut,\n      },\n    }];\n  }\n\n  if (type !== 'INSERT') return [];\n\n  const titre = record.titre.trim();\n  const titreMin = titre.toLowerCase();\n\n  return [{\n    json: {\n      evenement: 'INSERT',\n      ticket_id: record.id,\n      organisation_id: record.organisation_id,\n      titre,\n      description: record.description,\n      priorite: record.priorite,\n      alerte_immediate:\n        record.priorite === 'critique' ||\n        MOTS_CLES.some(mot => titreMin.includes(mot)),\n    },\n  }];\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        -112
+      ],
+      "id": "fa2e6740-a84a-4d5f-abd8-9a93f4e5a1e7",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "8034339b-744e-4c8a-950a-b12373c85cfa",
+              "leftValue": "={{ $json.alerte_immediate }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        672,
+        -112
+      ],
+      "id": "5f92476f-ca5a-423c-800f-0841d9305a0a",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "authentication": "webhook",
+        "content": "=sorry pour le spam ^-^\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.discord",
+      "typeVersion": 2,
+      "position": [
+        1120,
+        -208
+      ],
+      "id": "dc705ebc-7f6c-479d-b706-a4715cc1c12a",
+      "name": "Discord",
+      "webhookId": "d2d28097-b3a3-4208-b23d-1a2896cf09c1",
+      "credentials": {
+        "discordWebhookApi": {
+          "id": "b41UWdvTXPITOuXm",
+          "name": "Discord Webhook account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "PATCH",
+        "url": "=https://vkblumvmnqowirdcuoiz.supabase.co/rest/v1/tickets?id=eq.{{ $json.ticket_id }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "return=representation"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "statut",
+              "value": "en_cours"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        896,
+        -16
+      ],
+      "id": "1217d1dc-c059-423f-857f-b806e1cc0782",
+      "name": "HTTP PATCH FALSE",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "UmHVgWeoYZAMO0Ff",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "PATCH",
+        "url": "=https://vkblumvmnqowirdcuoiz.supabase.co/rest/v1/tickets?id=eq.{{ $json.ticket_id }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "return=representation"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "statut",
+              "value": "en_cours"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        896,
+        -208
+      ],
+      "id": "92ba8f80-ee24-4e8f-96bc-ce28d7bbffdf",
+      "name": "HTTP FALSE TRUE",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "UmHVgWeoYZAMO0Ff",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "webhook",
+        "content": "=test du faux hihi",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.discord",
+      "typeVersion": 2,
+      "position": [
+        1120,
+        -16
+      ],
+      "id": "1a0bf1d3-6e2c-4cd5-9902-5e3f71c93ae0",
+      "name": "Discord False",
+      "webhookId": "d2d28097-b3a3-4208-b23d-1a2896cf09c1",
+      "credentials": {
+        "discordWebhookApi": {
+          "id": "b41UWdvTXPITOuXm",
+          "name": "Discord Webhook account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.evenement }}",
+                    "rightValue": "INSERT",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "8ff0b9c4-e6c9-4de7-8b5e-de5de23e16a7"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Sortie 0"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "1c4d1077-0339-475d-a6bf-237c397ceaa4",
+                    "leftValue": "={{ $json.evenement }}",
+                    "rightValue": "UPDATE",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "sortie 1"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        448,
+        -112
+      ],
+      "id": "c8d3a254-a1b2-4168-b811-b5aecf5a1159",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "authentication": "webhook",
+        "content": "=test mise à jours UwU",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.discord",
+      "typeVersion": 2,
+      "position": [
+        608,
+        192
+      ],
+      "id": "0b0b8f25-b20c-4cb8-9eeb-ead64224ad80",
+      "name": "Discord UPDATE",
+      "webhookId": "d2d28097-b3a3-4208-b23d-1a2896cf09c1",
+      "credentials": {
+        "discordWebhookApi": {
+          "id": "b41UWdvTXPITOuXm",
+          "name": "Discord Webhook account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "[CORE] Ingestion & Routage Tickets": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "HTTP FALSE TRUE",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "HTTP PATCH FALSE",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP PATCH FALSE": {
+      "main": [
+        [
+          {
+            "node": "Discord False",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP FALSE TRUE": {
+      "main": [
+        [
+          {
+            "node": "Discord",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Discord UPDATE",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "98790f64-0305-448a-83c7-62f0d95444b9",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "01c8304b2e1468297d47c393393f5eab584e446e4ffe43a99d587e01da22c624"
+  },
+  "nodeGroups": [],
+  "id": "kY6dSpMIonDucTzQ",
+  "tags": []
+}
