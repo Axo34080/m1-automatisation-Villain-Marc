@@ -1,0 +1,22 @@
+info:
+  name: requete 1 webhook
+  type: http
+  seq: 3
+
+http:
+  method: POST
+  url: https://vkblumvmnqowirdcuoiz.supabase.co/auth/v1/admin/users
+  headers:
+    - name: apiKey
+      value: "{{secretKey}}"
+  body:
+    type: json
+    data: '{ "email": "tech@alpha.test", "password": "<à choisir>", "email_confirm": true }'
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
