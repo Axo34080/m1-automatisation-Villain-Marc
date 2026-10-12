@@ -1,0 +1,32 @@
+info:
+  name: injection-Admin
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{baseUrl}}/organisations"
+  headers:
+    - name: apikey
+      value: "{{secretKey}}"
+    - name: Prefer
+      value: return=representation
+  body:
+    type: json
+    data: '{ "nom": "AlphaCorp"}'
+  auth: inherit
+
+runtime:
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "201"
+    - expression: res.body[0].id
+      operator: isDefined
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

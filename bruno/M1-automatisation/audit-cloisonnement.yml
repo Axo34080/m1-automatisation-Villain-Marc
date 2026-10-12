@@ -1,0 +1,28 @@
+info:
+  name: audit-cloisonnement
+  type: http
+  seq: 2
+
+http:
+  method: GET
+  url: "{{baseUrl}}/tickets"
+  headers:
+    - name: apikey
+      value: "{{publishableKey}}"
+  auth: inherit
+
+runtime:
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+    - expression: res.body
+      operator: eq
+      value: "[]"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

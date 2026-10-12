@@ -1,0 +1,11 @@
+name: Supabase
+variables:
+  - secret: true
+    name: baseUrl
+    description: ""
+  - secret: true
+    name: publishableKey
+    description: ""
+  - secret: true
+    name: secretKey
+    description: ""
