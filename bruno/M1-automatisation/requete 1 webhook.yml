@@ -11,7 +11,7 @@ http:
       value: "{{secretKey}}"
   body:
     type: json
-    data: '{ "email": "tech@alpha.test", "password": "<à choisir>", "email_confirm": true }'
+    data: '{ "email": "tech@alpha.test", "password": "{{testPassword}}", "email_confirm": true }'
   auth: inherit
 
 settings:
